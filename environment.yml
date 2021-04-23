@@ -1,0 +1,17 @@
+# run: conda env create --file environment.yml
+name: fastapi-env
+dependencies:
+- python>=3.9
+- pip
+- pip:
+  - fastapi
+  - uvicorn
+
+
+
+
+# installed python
+#installed anaconda
+#configured pycharm to use the conda virtual env
+#conda install -c conda-forge fastapi
+#conda install -c conda-forge uvicorn
