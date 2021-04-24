@@ -17,35 +17,35 @@ choco install googlechrome -y --ignore-checksums
 choco install webdeploy -y
 choco install urlrewrite -y
 choco install iis-arr -y --ignore-checksums
-
-#reload path
-$env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
-
-git clone https://github.com/itsokov/FastApiExample.git $InstallPath -q
-
 choco install nssm -y
 choco install python -y
 
 #reload path
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User") 
 
-pip install -r requirements.yml
+git clone https://github.com/itsokov/FastApiExample.git $InstallPath -q
+
+pip install -r "$InstallPath\requirements.yml" 
 
 nssm install "FastAPIWindowsService" "uvicorn" "main:app --port 5000 --log-level info --workers 2"
-nssm set "FastAPIWindowsService" AppDirectory "C:\users\itsokov\FastApiExample\"
-nssm set "FastAPIWindowsService" AppStdout "C:\users\itsokov\FastApiExample\logs\access.log"
-nssm set "FastAPIWindowsService" AppStderr "C:\users\itsokov\FastApiExample\logs\service.log"
+nssm set "FastAPIWindowsService" AppDirectory "$InstallPath\"
+nssm set "FastAPIWindowsService" AppStdout "$InstallPath\logs\access.log"
+nssm set "FastAPIWindowsService" AppStderr "$InstallPath\logs\service.log"
 nssm start "FastAPIWindowsService"
 
 #nssm remove "FastAPIWindowsService"
 
 
-Copy-Item .\www\web.config C:\inetpub\wwwroot
+Copy-Item "$InstallPath\www\web.config" C:\inetpub\wwwroot
 
 ## add self signed certificate generation
 ## add arr enable
+Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST'  -filter "system.webServer/proxy" -name "enabled" -value "True"
+
 # add 443 binding to default website
 
-iisreset
+#add server variables
+Add-WebConfigurationProperty -pspath "MACHINE/WEBROOT/APPHOST" -location "Default Web Site"  -filter "system.webServer/rewrite/allowedServerVariables" -name "." -value @{name='HTTP_X_ORIGINAL_ACCEPT_ENCODING'}
+Add-WebConfigurationProperty -pspath "MACHINE/WEBROOT/APPHOST" -location "Default Web Site"  -filter "system.webServer/rewrite/allowedServerVariables" -name "." -value @{name='HTTP_ACCEPT_ENCODING'}
 
-#problem with compression!
+iisreset
