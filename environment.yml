@@ -12,6 +12,7 @@ dependencies:
 
 # installed python
 #installed anaconda
+# conda create -n fast_api
 #configured pycharm to use the conda virtual env
 #conda install -c conda-forge fastapi
 #conda install -c conda-forge uvicorn
